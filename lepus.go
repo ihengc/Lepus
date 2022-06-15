@@ -1,6 +1,8 @@
 package Lepus
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 /****************************************************************
  * @author: Ihc
@@ -8,16 +10,29 @@ import "database/sql"
  * @description:
  ***************************************************************/
 
-type DB struct {
-	raw *sql.DB
+// Lepus 对应数据库
+type Lepus struct {
+	raw          *sql.DB
+	sqlBuilder   *SQLBuilder
+	RowsAffected int64
+	Stmt         *Statement
 }
 
-func Open(driverName, dataSourceName string) *DB {
-	raw, err := sql.Open(driverName, dataSourceName)
+// Open 获取数据库连接
+func Open(driverName, dataSourceName string) (*Lepus, error) {
+	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	lepusDB := &DB{}
-	lepusDB.raw = raw
-	return lepusDB
+	lepus := &Lepus{}
+	lepus.raw = db
+	lepus.Stmt = &Statement{}
+	lepus.sqlBuilder = &SQLBuilder{}
+	return lepus, nil
+}
+
+// Create 新建数据
+func (lepus *Lepus) Create(value interface{}) {
+	lepus.Stmt.Dest = value
+	lepus.sqlBuilder.Create(lepus).Execute(lepus)
 }
