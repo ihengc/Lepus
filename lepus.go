@@ -34,5 +34,12 @@ func Open(driverName, dataSourceName string) (*Lepus, error) {
 // Create 新建数据
 func (lepus *Lepus) Create(value interface{}) {
 	lepus.Stmt.Dest = value
+	lepus.Stmt.ParseField()
 	lepus.sqlBuilder.Create(lepus).Execute(lepus)
+}
+
+// Delete 删除数据
+func (lepus *Lepus) Delete(value interface{}) {
+	lepus.Stmt.Dest = value
+	lepus.sqlBuilder.Delete(lepus).Execute(lepus)
 }
