@@ -1,18 +1,17 @@
-package clause
+package Lepus
+
+import "net"
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/15 0015 16:21
+* @date: 2022/6/17 0017 12:02
 * @version: 1.0
 * @description:
 *********************************************************/
 
-type Insert struct{}
-
-func (i Insert) Name() string {
-	return "INSERT"
+type Broker struct {
 }
 
-func (i Insert) MergeClause() {
+func (b *Broker) Handle(chan net.Conn) {
 
 }
