@@ -17,6 +17,7 @@ var app *Application
 
 func setup() {
 	app = NewApplication()
+
 }
 
 func TestApplication_Run(t *testing.T) {

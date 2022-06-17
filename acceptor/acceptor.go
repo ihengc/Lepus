@@ -1,13 +1,17 @@
-package Lepus
+package acceptor
+
+import "net"
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/15 0015 15:48
+* @date: 2022/6/17 0017 11:50
 * @version: 1.0
 * @description:
 *********************************************************/
 
-type Expression struct {
-	SQL  string
-	Vars []interface{}
+type Acceptor interface {
+	Run()
+	Stop()
+	LocalAddr() string
+	GetConnChan() chan net.Conn
 }

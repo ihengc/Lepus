@@ -1,17 +1,14 @@
-package accept
+package logger
 
-import "net"
+import "fmt"
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/17 0017 11:50
+* @date: 2022/6/17 0017 15:15
 * @version: 1.0
 * @description:
 *********************************************************/
 
-type IAccept interface {
-	Run()
-	Stop()
-	LocalAddr() string
-	GetConnChan() chan net.Conn
+func Log(a ...any) {
+	fmt.Println()
 }
