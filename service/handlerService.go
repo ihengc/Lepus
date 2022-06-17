@@ -27,7 +27,9 @@ func (h *HandlerService) Handle(connChan chan net.Conn) {
 		h.Dispatch(packet)
 	}
 }
+
 func (h *HandlerService) Dispatch(packet *connPackage.Packet) {
+	// TODO 判断当前数据报是需要本地处理还是需要其他服务处理
 	switch packet.PacketType {
 	case connPackage.Handshake:
 	case connPackage.Heartbeat:
