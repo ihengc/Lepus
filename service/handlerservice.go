@@ -1,17 +1,19 @@
-package Lepus
+package service
 
-import "net"
+import (
+	"net"
+)
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/17 0017 12:02
+* @date: 2022/6/17 0017 15:54
 * @version: 1.0
 * @description:
 *********************************************************/
 
-type Broker struct {
+type HandlerService struct {
 }
 
-func (b *Broker) Handle(chan net.Conn) {
+func (h *HandlerService) Handle(connChan chan net.Conn) {
 
 }

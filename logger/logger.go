@@ -1,6 +1,9 @@
 package logger
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 /********************************************************
 * @author: Ihc
@@ -9,6 +12,17 @@ import "fmt"
 * @description:
 *********************************************************/
 
+type Logger struct {
+	writer io.Writer
+}
+
+func (l *Logger) Log(a ...any) {
+}
+
+func NewLogger(writer io.Writer) *Logger {
+	return &Logger{writer: writer}
+}
+
 func Log(a ...any) {
-	fmt.Println()
+	fmt.Println(a)
 }
