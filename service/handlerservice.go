@@ -1,6 +1,7 @@
 package service
 
 import (
+	"Lepus/cluster"
 	connPackage "Lepus/conn"
 	"Lepus/logger"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 *********************************************************/
 
 type HandlerService struct {
+	rpcClient *cluster.RPCClient
 }
 
 func (h *HandlerService) Handle(connChan chan net.Conn) {
