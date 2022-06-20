@@ -1,7 +1,6 @@
 package conn
 
 import (
-	"encoding/binary"
 	"io"
 	"net"
 )
@@ -20,6 +19,8 @@ const (
 	Data
 )
 
+const PacketHeaderSize = 12
+
 type Packet struct {
 	ServerId   uint32
 	ServerType uint32
@@ -29,22 +30,16 @@ type Packet struct {
 }
 
 func DecodePacket(conn net.Conn) (*Packet, error) {
-	packetHeader := make([]byte, 9)
-	_, err := io.ReadFull(conn, packetHeader)
+	buffer := make([]byte, PacketHeaderSize)
+	_, err := io.ReadFull(conn, buffer)
 	if err != nil {
 		return nil, err
 	}
-	serverId := binary.LittleEndian.Uint32(packetHeader[:4])
-	serverType := binary.LittleEndian.Uint32(packetHeader[4:8])
-	packetType := binary.LittleEndian.Uint16(packetHeader[8:9])
-	packetSize := binary.LittleEndian.Uint32(packetHeader[9:13])
-
 	packet := &Packet{}
-
-	packet.ServerId = serverId
-	packet.ServerType = serverType
-	packet.PacketType = PacketType(packetType)
-	packet.PacketSize = packetSize
-
 	return packet, nil
+}
+
+func EncodePacket(packet *Packet) []byte {
+	buffer := make([]byte, packet.PacketSize)
+	return buffer
 }

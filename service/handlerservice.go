@@ -27,10 +27,18 @@ func (h *HandlerService) Handle(connChan chan net.Conn) {
 		h.Dispatch(packet)
 	}
 }
+
 func (h *HandlerService) Dispatch(packet *connPackage.Packet) {
 	switch packet.PacketType {
 	case connPackage.Handshake:
 	case connPackage.Heartbeat:
 
 	}
+}
+
+func isLocalService(packet *connPackage.Packet) bool {
+	if packet.ServerType == 1 && packet.ServerId == 1 {
+		return true
+	}
+	return false
 }
