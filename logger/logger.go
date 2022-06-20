@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"io"
+	"sync"
 )
 
 /********************************************************
@@ -13,14 +14,10 @@ import (
 *********************************************************/
 
 type Logger struct {
-	writer io.Writer
-}
-
-func (l *Logger) Log(a ...any) {
-}
-
-func NewLogger(writer io.Writer) *Logger {
-	return &Logger{writer: writer}
+	out    io.Writer
+	lock   sync.Mutex
+	buffer []byte
+	prefix string
 }
 
 func Log(a ...any) {
