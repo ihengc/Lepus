@@ -1,6 +1,7 @@
 package service
 
 import (
+	"Lepus/cluster"
 	connPackage "Lepus/conn"
 	"Lepus/logger"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 *********************************************************/
 
 type HandlerService struct {
+	rpcClient *cluster.RPCClient
 }
 
 func (h *HandlerService) Handle(connChan chan net.Conn) {
@@ -35,4 +37,11 @@ func (h *HandlerService) Dispatch(packet *connPackage.Packet) {
 	case connPackage.Heartbeat:
 
 	}
+}
+
+func isLocalService(packet *connPackage.Packet) bool {
+	if packet.ServerType == 1 && packet.ServerId == 1 {
+		return true
+	}
+	return false
 }
