@@ -16,26 +16,22 @@ type IPacket interface {
 
 // DefaultPacket 数据包
 type DefaultPacket struct {
-	ID   uint32
-	Data []byte
+	id   uint32
+	data []byte
 }
 
 func (d *DefaultPacket) GetID() uint32 {
-	//TODO implement me
-	panic("implement me")
+	return d.id
 }
 
 func (d *DefaultPacket) GetData() []byte {
-	//TODO implement me
-	panic("implement me")
+	return d.data
 }
 
 func (d *DefaultPacket) SetID(id uint32) {
-	//TODO implement me
-	panic("implement me")
+	d.id = id
 }
 
 func (d *DefaultPacket) SetData(data []byte) {
-	//TODO implement me
-	panic("implement me")
+	d.data = data
 }
