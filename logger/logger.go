@@ -21,5 +21,9 @@ type Logger struct {
 }
 
 func Log(a ...any) {
-	fmt.Println(a)
+	fmt.Println(a...)
+}
+
+func Err(a ...any) {
+	fmt.Println(a...)
 }

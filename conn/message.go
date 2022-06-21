@@ -1,17 +1,12 @@
-package acceptor
-
-import "net"
+package conn
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/17 0017 11:50
+* @date: 2022/6/21 0021 13:47
 * @version: 1.0
 * @description:
 *********************************************************/
 
-type IAcceptor interface {
-	Run()
-	Stop()
-	LocalAddr() string
-	GetConnChan() chan net.Conn
+// IMessage 消息
+type IMessage interface {
 }

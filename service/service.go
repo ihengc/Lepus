@@ -1,8 +1,12 @@
-package packet
+package service
 
 /********************************************************
 * @author: Ihc
-* @date: 2022/6/20 0020 15:37
+* @date: 2022/6/21 0021 14:41
 * @version: 1.0
 * @description:
 *********************************************************/
+
+type IService interface {
+	GetServiceName() string
+}
