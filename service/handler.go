@@ -17,6 +17,7 @@ import (
 
 // HandlerService 连接服务
 type HandlerService struct {
+	name        string
 	packetCodec codec.IPacketCodec
 }
 
@@ -28,13 +29,28 @@ func (h *HandlerService) Handle(connChan chan net.Conn) {
 			logger.Err(err)
 			continue
 		}
-		h.parsePacket(packet)
+		h.Dispatch(packet)
 	}
 }
 
-// parsePacket 分析包
-func (h *HandlerService) parsePacket(packet connPkg.IPacket) {
+// Dispatch 分析包
+func (h *HandlerService) Dispatch(packet connPkg.IPacket) {
 	fmt.Println(packet.GetID())
+	if h.name == packet.GetServerName() {
+		h.localHandle(packet)
+	} else {
+		h.remoteHandle(packet)
+	}
+}
+
+// localHandle
+func (h *HandlerService) localHandle(packet connPkg.IPacket) {
+
+}
+
+// remoteHandle
+func (h *HandlerService) remoteHandle(packet connPkg.IPacket) {
+
 }
 
 // NewHandlerService 创建连接处理服务
