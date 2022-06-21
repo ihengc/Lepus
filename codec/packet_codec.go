@@ -28,3 +28,18 @@ type IPacketCodec interface {
 	PacketEncoder
 	PacketDecoder
 }
+
+// DefaultPacketCodec 数据报默认的编解码器
+type DefaultPacketCodec struct{}
+
+// Encode 编码
+func (d *DefaultPacketCodec) Encode(packet conn.IPacket) ([]byte, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+// Decode 解码
+func (d *DefaultPacketCodec) Decode(reader io.Reader) (conn.IPacket, error) {
+	//TODO implement me
+	panic("implement me")
+}

@@ -67,6 +67,7 @@ func (app *Application) Run() {
 	case <-signalChan:
 		app.Stop()
 	case <-app.closeChan:
+		logger.Log("Application Stopped")
 		return
 	}
 }
@@ -85,10 +86,13 @@ func (app *Application) RegisterAcceptor(iAcceptor acceptor.IAcceptor) {
 func (app *Application) Stop() {
 	select {
 	case <-app.closeChan:
+		logger.Log("Channel")
 	default:
+		logger.Log("Channel default")
 		app.isRunning = false
 		app.closeChan <- true
 		close(app.closeChan)
+		logger.Log("Channel default end")
 	}
 }
 
@@ -97,14 +101,18 @@ func NewApplication(name string) *Application {
 	app := new(Application)
 	app.name = name
 	app.closeChan = make(chan bool)
+	app.handlerService = service.NewHandlerService(app.packetCodec)
 	return app
 }
 
 // NewApplicationWithOption 创建应用
-func NewApplicationWithOption(opts ...AppOpt) *Application {
+func NewApplicationWithOption(name string, opts ...AppOpt) *Application {
 	app := new(Application)
 	for _, opt := range opts {
 		opt(app)
 	}
+	app.name = name
+	app.closeChan = make(chan bool)
+	app.handlerService = service.NewHandlerService(app.packetCodec)
 	return app
 }

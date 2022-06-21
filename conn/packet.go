@@ -8,8 +8,34 @@ package conn
 
 // IPacket 表示一个数据包
 type IPacket interface {
-	GetID() int
+	GetID() uint32
 	GetData() []byte
-	SetID(int)
+	SetID(uint32)
 	SetData([]byte)
+}
+
+// DefaultPacket 数据包
+type DefaultPacket struct {
+	ID   uint32
+	Data []byte
+}
+
+func (d *DefaultPacket) GetID() uint32 {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (d *DefaultPacket) GetData() []byte {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (d *DefaultPacket) SetID(id uint32) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (d *DefaultPacket) SetData(data []byte) {
+	//TODO implement me
+	panic("implement me")
 }
