@@ -6,8 +6,10 @@ package conn
  * @description:
  ***************************************************************/
 
+type PacketType byte
+
 const (
-	Heartbeats = iota + 1
+	Heartbeats PacketType = iota + 1
 )
 
 // IPacket 表示一个数据包
@@ -17,15 +19,15 @@ type IPacket interface {
 	SetID(uint32)
 	SetData([]byte)
 	GetServerName() string
-	GetPacketType() uint8
+	GetPacketType() PacketType
 }
 
 // DefaultPacket 数据包
 type DefaultPacket struct {
 	id          uint32
-	typ         uint8
 	data        []byte
 	serviceName string
+	typ         PacketType
 }
 
 func (d *DefaultPacket) GetID() uint32 {
@@ -46,4 +48,8 @@ func (d *DefaultPacket) SetData(data []byte) {
 
 func (d *DefaultPacket) GetServerName() string {
 	return "Lepus"
+}
+
+func (d *DefaultPacket) GetPacketType() PacketType {
+	return d.typ
 }
