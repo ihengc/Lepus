@@ -14,17 +14,11 @@ var (
 	NilPointErr = errors.New("nil point error")
 )
 
-// Comparator 比较接口
-type Comparator interface {
-	// Compare 比较e1与e2的大小
-	Compare(e1, e2 interface{}) int
-}
-
 type IPriorityQueue interface {
 	// Add 将指定元素插入到队列中
-	Add(e interface{}) (bool, error)
+	Add(e interface{}) bool
 	// Offer 将指定元素插入到队列中
-	Offer(e interface{}) (bool, error)
+	Offer(e interface{}) bool
 	// Remove 从队列中移除指定元素的单个实例(若元素存在)
 	Remove(e interface{}) bool
 	// Clear 清空队列
@@ -72,21 +66,21 @@ func (p *PriorityQueue) grow() {
 }
 
 // Add 将指定元素插入到队列中
-func (p *PriorityQueue) Add(e interface{}) (bool, error) {
+func (p *PriorityQueue) Add(e interface{}) bool {
 	return p.Offer(e)
 }
 
 // Offer 将指定元素插入到队列中
-func (p *PriorityQueue) Offer(e interface{}) (bool, error) {
+func (p *PriorityQueue) Offer(e interface{}) bool {
 	if e == nil {
-		return false, NilPointErr
+		return false
 	}
 	if p.size >= cap(p.queue) {
 		p.grow()
 	}
 	p.siftUp(p.size, e)
 	p.size++
-	return true, nil
+	return true
 }
 
 // siftUp 向上调整树的结构，使其满足堆的性质
