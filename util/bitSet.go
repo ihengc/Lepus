@@ -19,14 +19,6 @@ package util
 // 		与一个值为真的数做异或运算，其值为该数值的相反
 //		需要将一个值反转时，可以用真值与其做异或运算
 // 		与一个值位假的数做异或运算，真值被反转，假值保持不变
-// 关于掩码：
-//
-// 关于左移：
-// 	在Python中左移操作是没有溢出的情况的，而在Golang中左移会
-// 	发生溢出，当左移后的数大于当前数的数据类型最大值时，会报错
-// 	如下代码会有问题：
-// 	int8(1) << 7
-// 	第8位为符号位，所以最多只能移动到第7位。
 
 // IBitSet 定义BitSet需要实现的接口
 type IBitSet interface {
@@ -57,7 +49,7 @@ type IBitSet interface {
 	// 若设置成功返回true；否则返回false
 	Clear(bitIndex int) bool
 
-	// ClearRange 置fromIndex到toIndex范围内的位设置为false。
+	// ClearRange 将fromIndex到toIndex范围内的位设置为false。
 	// 若设置成功返回true；否则返回false
 	ClearRange(fromIndex, toIndex int) bool
 
@@ -233,6 +225,36 @@ func (b *BitSet) Clear(bitIndex int) bool {
 	b.words[wordIndex] &= ^(1 << b.bitIndexOffset(bitIndex))
 	// 将一位置为了false，需要重新计算BitSet逻辑大小
 	b.recalculateWordsInUse()
+	return true
+}
+
+// ClearRange 将fromIndex到toIndex范围内的位设置为false。
+// 我们需要将一个int64位中的某一段位置为false。假设范围的起
+// 始位置和结束位置分别为startIndex和endIndex，我们需要在
+// startIndex到endIndex之间所有位的值为false，其他位为false
+// 如下:
+// 		1111-0000-0011
+// = 	1111-0000-0000 +
+// 		0000-0000-0011
+// 我们只需要将全为true的int64位数左移到startIndex，
+//
+func (b *BitSet) ClearRange(fromIndex, toIndex int) bool {
+	if !b.checkRange(fromIndex, toIndex) {
+		return false
+	}
+	startWordIndex := b.wordIndex(fromIndex)
+	endWordIndex := b.wordIndex(toIndex)
+	// startWordIndex等于endWordIndex说明区间在一个int64内
+	if startWordIndex == endWordIndex {
+		startOffset := b.bitIndexOffset(fromIndex)
+		endOffset := b.bitIndexOffset(toIndex)
+		b.words[startWordIndex] &= wordMask & (1 << endOffset) & (1<<startOffset - 1)
+	} else {
+		//
+		for i := startWordIndex; i < endWordIndex; i++ {
+			b.words[i] = 0
+		}
+	}
 	return true
 }
 
