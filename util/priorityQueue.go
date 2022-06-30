@@ -14,33 +14,33 @@ var (
 	NilPointErr = errors.New("nil point error")
 )
 
-type IPriorityQueue interface {
+type IPriorityQueue[E any] interface {
 	// Add 将指定元素插入到队列中
-	Add(e interface{}) bool
+	Add(e E) bool
 	// Offer 将指定元素插入到队列中
-	Offer(e interface{}) bool
+	Offer(e E) bool
 	// Remove 从队列中移除指定元素的单个实例(若元素存在)
-	Remove(e interface{}) bool
+	Remove(e E) bool
 	// Clear 清空队列
 	Clear()
 	// Size 返回队列中的元素个数
 	Size() int
 	// Poll 检索并删除此队列的头部，如果此队列为空，则返回nil
-	Poll() interface{}
+	Poll() E
 	// Peek 检索但不删除此队列的头部，如果此队列为空，则返回nil
-	Peek() interface{}
+	Peek() E
 	// Contains 如果此队列包含指定元素，则返回 true
-	Contains(e interface{}) bool
+	Contains(e E) bool
 }
 
 // PriorityQueue 优先级队列
-type PriorityQueue struct {
+type PriorityQueue[E any] struct {
 	// size 存放优先级队列中的元素大小
 	size int
 	// comparator 元素比较器
 	comparator Comparator
 	// queue 存放元素的数组
-	queue []interface{}
+	queue []E
 }
 
 // grow 数组扩容
@@ -48,11 +48,11 @@ type PriorityQueue struct {
 // 的扩容机制。当数组容量小于64时，每次扩容2
 // 个容量；若数组容量大于等于64时，每次扩容原
 // 来容量的1.5倍
-func (p *PriorityQueue) grow() {
+func (p *PriorityQueue[E]) grow() {
 	var (
 		oldCapacity int
 		newCapacity int
-		newQueue    []interface{}
+		newQueue    []E
 	)
 	oldCapacity = cap(p.queue)
 	if oldCapacity < 64 {
@@ -60,18 +60,18 @@ func (p *PriorityQueue) grow() {
 	} else {
 		newCapacity = oldCapacity + oldCapacity>>1
 	}
-	newQueue = make([]interface{}, newCapacity, newCapacity)
+	newQueue = make([]E, newCapacity, newCapacity)
 	copy(newQueue, p.queue)
 	p.queue = newQueue
 }
 
 // Add 将指定元素插入到队列中
-func (p *PriorityQueue) Add(e interface{}) bool {
+func (p *PriorityQueue[E]) Add(e E) bool {
 	return p.Offer(e)
 }
 
 // Offer 将指定元素插入到队列中
-func (p *PriorityQueue) Offer(e interface{}) bool {
+func (p *PriorityQueue[E]) Offer(e E) bool {
 	if e == nil {
 		return false
 	}
@@ -97,7 +97,7 @@ func (p *PriorityQueue) Offer(e interface{}) bool {
 // 个树已经满足了堆的性质，也就是说明我们找到
 // 了新增元素正确地插入位置，我们记录插入的位
 // 置，然后在该位置放入新增元素即可。
-func (p *PriorityQueue) siftUp(k int, x interface{}) {
+func (p *PriorityQueue[E]) siftUp(k int, x E) {
 	for k > 0 {
 		parentIndex := (k - 1) >> 1
 		parent := p.queue[parentIndex]
@@ -111,7 +111,7 @@ func (p *PriorityQueue) siftUp(k int, x interface{}) {
 }
 
 // Remove 从队列中移除指定元素的单个实例(若元素存在)
-func (p *PriorityQueue) Remove(e interface{}) bool {
+func (p *PriorityQueue[E]) Remove(e E) bool {
 	i := p.indexOf(e)
 	if i == -1 {
 		return false
@@ -123,7 +123,7 @@ func (p *PriorityQueue) Remove(e interface{}) bool {
 
 // indexOf 返回元素在底层数组中的索引
 // 复杂度O(n)
-func (p *PriorityQueue) indexOf(e interface{}) int {
+func (p *PriorityQueue[E]) indexOf(e E) int {
 	if e != nil {
 		for i := 0; i < p.size; i++ {
 			if p.comparator.Compare(e, p.queue[i]) == 0 {
@@ -136,7 +136,7 @@ func (p *PriorityQueue) indexOf(e interface{}) int {
 
 // removeAt 删除指定位置处的元素，若指定处的元素存在，则
 // 返回被删除的元素；否则返回nil
-func (p *PriorityQueue) removeAt(i int) interface{} {
+func (p *PriorityQueue[E]) removeAt(i int) E {
 	n := p.size - 1
 	p.size--
 	if i == n {
@@ -159,7 +159,7 @@ func (p *PriorityQueue) removeAt(i int) interface{} {
 // siftDown 向下调整树结构，使其满足堆的性质
 // 树的结构我们关注的是父节点(当前节点)与其子
 // 节点的大小关系
-func (p *PriorityQueue) siftDown(k int, x interface{}) {
+func (p *PriorityQueue[E]) siftDown(k int, x E) {
 	half := p.size >> 1
 	for k < half {
 		childIndex := (k << 1) + 1
@@ -175,7 +175,7 @@ func (p *PriorityQueue) siftDown(k int, x interface{}) {
 }
 
 // Poll 检索并删除此队列的头部，如果此队列为空，则返回nil
-func (p *PriorityQueue) Poll() interface{} {
+func (p *PriorityQueue[E]) Poll() E {
 	if p.size == 0 {
 		return nil
 	}
@@ -191,22 +191,22 @@ func (p *PriorityQueue) Poll() interface{} {
 }
 
 // Size 返回队列中的元素个数
-func (p *PriorityQueue) Size() int {
+func (p *PriorityQueue[E]) Size() int {
 	return p.size
 }
 
 // Peek 检索但不删除此队列的头部，如果此队列为空，则返回nil
-func (p *PriorityQueue) Peek() interface{} {
+func (p *PriorityQueue[E]) Peek() E {
 	return p.queue[0]
 }
 
 // Contains 如果此队列包含指定元素，则返回 true
-func (p *PriorityQueue) Contains(e interface{}) bool {
+func (p *PriorityQueue[E]) Contains(e E) bool {
 	return p.indexOf(e) != -1
 }
 
 // Clear 清空队列
-func (p *PriorityQueue) Clear() {
+func (p *PriorityQueue[E]) Clear() {
 	n := p.size
 	for i := 0; i < n; i++ {
 		p.queue[i] = nil
@@ -215,15 +215,15 @@ func (p *PriorityQueue) Clear() {
 
 // NewPriorityQueue 创建优先级队列
 // 这里完全信任了用户的初始容量数据
-func NewPriorityQueue(initialCapacity int, comparator Comparator) *PriorityQueue {
+func NewPriorityQueue[E any](initialCapacity int, comparator Comparator) *PriorityQueue[E] {
 	if comparator == nil {
 		panic(NilPointErr)
 	}
-	p := new(PriorityQueue)
+	p := new(PriorityQueue[E])
 	if initialCapacity < 0 {
-		p.queue = make([]interface{}, 11, 11)
+		p.queue = make([]E, 11, 11)
 	} else {
-		p.queue = make([]interface{}, initialCapacity, initialCapacity)
+		p.queue = make([]E, initialCapacity, initialCapacity)
 	}
 	p.comparator = comparator
 	return p
