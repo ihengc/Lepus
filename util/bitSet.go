@@ -8,22 +8,89 @@ package util
 
 // BitSet为存放bit的容器，会涉及到位的逻辑运算和掩码相关概念
 // 常用的位的逻辑运算：
-// 1.与运算
-// 2.或运算
-// 3.非运算
-// 4.异或运算
-// 与一个值为真的数做异或运算，则返回该数的相反。
-// 与一个值位假的数做异或运算，真值被反转，假值保持不变
+// 	1.与运算
+// 		与一个值为假的数做与运算，其值必为假
+//		与一个值为真的数做与运算，其值保持原样
+//		需要将一个值置为假时，可以用假值与其做与运算
+// 	2.或运算
+//		与一个值为真的数值做或运算，其值必为真
+//		需要将一个值置为真时，可以用真值与其做或运算
+// 	3.异或运算
+// 		与一个值为真的数做异或运算，其值为该数值的相反
+//		需要将一个值反转时，可以用真值与其做异或运算
+// 		与一个值位假的数做异或运算，真值被反转，假值保持不变
 // 关于掩码：
+//
 // 关于左移：
-// 在Python中左移操作是没有溢出的情况的，而在Golang中左移会
-// 发生溢出，当左移后的数大于当前数的数据类型最大值时，会报错
-// 如下代码会有问题：
-// int8(1) << 7
-// 第8位为符号位，所以最多只能移动到第7位。
+// 	在Python中左移操作是没有溢出的情况的，而在Golang中左移会
+// 	发生溢出，当左移后的数大于当前数的数据类型最大值时，会报错
+// 	如下代码会有问题：
+// 	int8(1) << 7
+// 	第8位为符号位，所以最多只能移动到第7位。
 
 // IBitSet 定义BitSet需要实现的接口
 type IBitSet interface {
+	// Set 指定索引处的位设置为true。
+	// 若设置成功返回true；否则返回false
+	Set(bitIndex int) bool
+
+	// SetValue 指定索引处的位设置为给定的值。
+	// 若设置成功则返回true；否则返回false
+	SetValue(bitIndex int, value bool) bool
+
+	// SetRange 设置fromIndex到toIndex范围内的位设置为true。
+	// 若设置成功返回true；否则返回false
+	SetRange(fromIndex, toIndex int) bool
+
+	// SetValueRange 设置fromIndex到toIndex范围内的位为指定的值（0或1）。
+	// 若设置成功返回true；否则返回false
+	SetValueRange(fromIndex, toIndex int, value bool) bool
+
+	// NextSetBit
+	// 返回第一个被设置为true的位的索引
+	NextSetBit(fromIndex int) int
+
+	// ClearAll 设置所有的位为false
+	ClearAll()
+
+	// Clear 指定索引处的位设置为false
+	// 若设置成功返回true；否则返回false
+	Clear(bitIndex int) bool
+
+	// ClearRange 置fromIndex到toIndex范围内的位设置为false。
+	// 若设置成功返回true；否则返回false
+	ClearRange(fromIndex, toIndex int) bool
+
+	// NextClearBit
+	// 返回第一个被设置为false的位的索引
+	NextClearBit(fromIndex int) int
+
+	// Get 获取指定索引处位的值
+	Get(bitIndex int) (bool, error)
+
+	// GetRange 获取fromIndex到toIndex范围内位的值
+	// 若指定范围合法，返回BitSet；否则返回nil
+	GetRange(fromIndex, toIndex int) IBitSet
+
+	// Flip 将指定索引处的位设置为其补码
+	Flip(bitIndex int)
+
+	// FlipRange 将指定范围索引内的位设置为其补码
+	FlipRange(fromIndex, toIndex int) bool
+
+	// IsEmpty 若BitSet中无位被设置为true则返回true
+	IsEmpty() bool
+
+	// Len 返回BitSet的逻辑大小
+	Len() int
+
+	// And 与目标BItSet执行逻辑与运算
+	And(set IBitSet)
+
+	// AndNot
+
+	// Or
+	// Xor
 }
 
 const (
@@ -32,6 +99,8 @@ const (
 
 // BitSet bit容器
 type BitSet struct {
+	// words 用来存放位，为int64数组，数组中每
+	// 一个元素占64位
 	words []int64
 	// wordsInUse words的逻辑大小
 	wordsInUse int
@@ -119,6 +188,52 @@ func (b *BitSet) FlipRange(fromIndex, toIndex int) {
 	if startWordIndex == endWordIndex {
 		b.words[startWordIndex] ^= 1
 	}
+}
+
+// Set 指定索引处的位设置为true
+func (b *BitSet) Set(bitIndex int) bool {
+	if bitIndex < 0 {
+		return false
+	}
+	wordIndex := b.wordIndex(bitIndex)
+	b.expandTo(wordIndex)
+
+	b.words[wordIndex] |= 1 << b.bitIndexOffset(bitIndex)
+	return true
+}
+
+// SetValue 指定索引处的位置设置为value值（0或1）
+func (b *BitSet) SetValue(bitIndex int, value bool) bool {
+	if bitIndex < 0 {
+		return false
+	}
+	if value {
+		b.Set(bitIndex)
+	} else {
+		b.Clear(bitIndex)
+	}
+	return true
+}
+
+// Clear 将指定索引处位的值设置为false
+// 与一个假值做与运算时，其得到的值必定为假；所以可以采用与运算
+// 但是我们需要考虑的除了要处理的位其他位是需要保持原样的。在与
+// 运算中只有与一个真值做与运算得到的值才会是其本身。
+// 所以我们需要类似 01111 1111... 的二进制数。我们只需要将1向
+// 左进行移位，然后取反即可
+func (b *BitSet) Clear(bitIndex int) bool {
+	if bitIndex < 0 {
+		return false
+	}
+	// wordIndex 表示当前bitIndex应该在第几个元素中
+	wordIndex := b.wordIndex(bitIndex)
+	if wordIndex >= b.wordsInUse {
+		return false
+	}
+	b.words[wordIndex] &= ^(1 << b.bitIndexOffset(bitIndex))
+	// 将一位置为了false，需要重新计算BitSet逻辑大小
+	b.recalculateWordsInUse()
+	return true
 }
 
 func NewBitSet(nBits int) *BitSet {
