@@ -7,8 +7,8 @@ package util
 * @description:
 *********************************************************/
 
-// Comparator 比较接口
-type Comparator interface {
+// IComparator 比较接口
+type IComparator interface {
 	// Compare 比较e1与e2的大小
 	Compare(e1, e2 interface{}) int
 }
